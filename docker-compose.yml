@@ -5,5 +5,5 @@ services:
     image: xy:latest
     container_name: xy
     ports:
-      - "6789:80"
+      - "6789:8080"
     restart: always
