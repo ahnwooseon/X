@@ -7,8 +7,8 @@ on:
     branches: ["main"]
 
 jobs:
-  build-app:
-    name: 🛠 Build, Test & Publish Blazor App
+  build-and-deploy:
+    name: 🛠 Build, Test, and Deploy Blazor App with Docker
     runs-on: self-hosted
 
     steps:
@@ -20,42 +20,20 @@ jobs:
         with:
           dotnet-version: 9.0.x
 
-      - name: Restore, Build, Test and Publish
+      - name: Restore, Build and Test
         run: |
           dotnet restore
           dotnet build --no-restore
           dotnet test --no-build --verbosity normal
-          dotnet publish XY/XY.csproj -c Release -o publish
 
-      - name: Upload published app
-        uses: actions/upload-artifact@v4
-        with:
-          name: xy
-          path: publish/
-
-  build-image:
-    name: 🐳 Build Docker Image Locally
-    needs: build-app
-    runs-on: self-hosted
-
-    steps:
-      - name: Download published app
-        uses: actions/download-artifact@v4
-        with:
-          name: xy
-          path: app/
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build Docker Image
         run: |
-          docker build -t xy:latest ./app
+          docker build -t xy:latest .
 
-  deploy:
-    name: 🚚 Deploy Container via Docker Compose
-    needs: build-image
-    runs-on: self-hosted
-
-    steps:
-      - name: Deploy with docker-compose
+      - name: Deploy Container (with Compose)
         run: |
-          docker compose down
-          docker compose up -d
+          docker compose down || true
+          docker compose up -d --build
