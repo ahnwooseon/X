@@ -5,29 +5,28 @@ WORKDIR /src
 # Installer le workload aspire
 RUN dotnet workload install aspire
 
-# Copie du projet Aspire (.csproj)
-COPY ["XY.AppHost/XY.AppHost.csproj", "XY.AppHost/"]
-RUN dotnet restore "XY.AppHost/XY.AppHost.csproj"
+# Copier uniquement les fichiers nécessaires pour restaurer au début
+COPY XY.AppHost/XY.AppHost.csproj XY.AppHost/
+RUN dotnet restore XY.AppHost/XY.AppHost.csproj
 
-# Copie du code source
+# Copier tout le reste après la restauration
 COPY . .
 
 # Construction du projet en mode Release
-WORKDIR "/src/XY.AppHost"
-RUN dotnet build "XY.AppHost.csproj" -c Release -o /app/build
+WORKDIR /src/XY.AppHost
+RUN dotnet build -c Release -o /app/build
 
 # Étape 2 : Publication de l'application
 FROM build AS publish
-WORKDIR /src/XY.AppHost
-RUN dotnet publish "XY.AppHost.csproj" -c Release -o /app/publish
+RUN dotnet publish -c Release -o /app/publish
 
 # Étape 3 : Image finale pour exécuter l'application
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
 EXPOSE 80
 
-# Copie des fichiers publiés dans le répertoire final
+# Copie du résultat publié
 COPY --from=publish /app/publish .
 
-# Lancer l'application Aspire
+# Lancer l'application
 ENTRYPOINT ["dotnet", "XY.AppHost.dll"]
