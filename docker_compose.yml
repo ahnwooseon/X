@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: xy-api
+    ports:
+      - "5001:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING:-Server=localhost;Database=xy;User=sa;Password=YourStrong@Password;TrustServerCertificate=True}
+      - REDIS_CONNECTION=${REDIS_CONNECTION:-localhost:6379}
+    restart: always
+    networks:
+      - xy-network
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: xy-web
+    ports:
+      - "6789:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ApiService__Url=${API_SERVICE_URL:-http://api}
+      - ApiService__Port=${API_SERVICE_PORT:-80}
+    depends_on:
+      - api
+    restart: always
+    networks:
+      - xy-network
+
+networks:
+  xy-network:
+    driver: bridge
