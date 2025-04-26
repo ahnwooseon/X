@@ -33,6 +33,11 @@ jobs:
         run: |
           docker build -t xy:latest .
 
+      - name: Stop & Remove old container
+        run: |
+          docker stop xy || true
+          docker rm xy || true
+
       - name: Deploy Container (with Compose)
         run: |
           docker compose down || true
