@@ -34,7 +34,7 @@ jobs:
           echo "DB_CONNECTION_STRING=${{ secrets.DB_CONNECTION_STRING }}" > .env
           echo "REDIS_CONNECTION=${{ secrets.REDIS_CONNECTION }}" >> .env
           echo "API_SERVICE_URL=http://api" >> .env
-          echo "API_SERVICE_PORT=80" >> .env
+          echo "API_SERVICE_PORT=8080" >> .env
           # Ajoute d'autres variables selon tes besoins
 
       - name: Deploy Containers with Compose
