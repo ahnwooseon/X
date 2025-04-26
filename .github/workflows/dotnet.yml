@@ -25,7 +25,7 @@ jobs:
           dotnet restore
           dotnet build --no-restore
           dotnet test --no-build --verbosity normal
-          dotnet publish XY/XY.csproj Release -o publish
+          dotnet publish XY/XY.csproj -c Release -o publish
 
       - name: Upload published app
         uses: actions/upload-artifact@v4
