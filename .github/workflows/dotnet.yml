@@ -1,4 +1,4 @@
-name: Build, Push Docker & Deploy Blazor App
+name: CI/CD - Build, Push & Deploy Blazor App
 
 on:
   push:
@@ -7,56 +7,76 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-deploy:
-    runs-on: [self-hosted]
-
+  build-app:
+    name: 🛠 Build & Test Blazor App
+    runs-on: self-hosted
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 9.0.x
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
 
-    - name: Restore dependencies
-      run: dotnet restore
+      - name: Restore, Build, Test, Publish
+        run: |
+          dotnet restore
+          dotnet build --no-restore
+          dotnet test --no-build --verbosity normal
+          dotnet publish -c Release -o app
 
-    - name: Build
-      run: dotnet build --no-restore
+      - name: Upload Published App
+        uses: actions/upload-artifact@v4
+        with:
+          name: blazor-app
+          path: app/
 
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+  build-image:
+    name: 🐳 Build & Push Docker Image
+    needs: build-app
+    runs-on: self-hosted
+    steps:
+      - name: Download Published App
+        uses: actions/download-artifact@v4
+        with:
+          name: blazor-app
+          path: app/
 
-    - name: Publish app
-      run: dotnet publish -c Release -o app
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build & Push Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ahnwooseon/xy:latest
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./Dockerfile
-        push: true
-        tags: ahnwooseon/xy:latest
+  deploy:
+    name: 🚚 Deploy to Synology
+    needs: build-image
+    runs-on: self-hosted
+    environment:
+      name: production
+      url: http://${{ secrets.SSH_HOST }}:8080
+    steps:
+      - name: Add SSH Key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Add SSH key
-      uses: webfactory/ssh-agent@v0.9.0
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-    - name: Deploy to Synology via SSH
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          docker pull myuser/blazor-app:latest
-          docker stop blazor-app || true
-          docker rm blazor-app || true
-          docker run -d --name blazor-app -p 8080:80 ahnwooseon/xy:latest
-        EOF
+      - name: Pull & Run Container
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            docker pull ahnwooseon/xy:latest
+            docker stop blazor-app || true
+            docker rm blazor-app || true
+            docker run -d --name blazor-app -p 8080:80 ahnwooseon/xy:latest
+          EOF
