@@ -6,11 +6,11 @@ WORKDIR /src
 RUN dotnet workload install aspire
 
 # Copier seulement les fichiers de projet et restaurer
-COPY ["XY.AppHost/XY.AppHost.csproj", "XY.AppHost/"]
+COPY "XY.AppHost/XY.AppHost.csproj" "XY.AppHost/"
 RUN dotnet restore "XY.AppHost/XY.AppHost.csproj"
 
 # Copier tout le code source
-COPY . .
+COPY "XY.AppHost/" "XY.AppHost/"
 
 # Construire l'application
 WORKDIR "/src/XY.AppHost"
