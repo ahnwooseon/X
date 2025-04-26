@@ -34,7 +34,7 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build XY.AppHost -t xy:latest .
+          docker build XY.AppHost/Dockerfile -t xy:latest .
 
       - name: Stop & Remove old container
         run: |
