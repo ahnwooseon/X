@@ -1,3 +1,6 @@
 <Solution>
-  <Project Path="XY/XY.csproj" />
+  <Project Path="XY.ApiService/XY.ApiService.csproj" />
+  <Project Path="XY.AppHost/XY.AppHost.csproj" />
+  <Project Path="XY.ServiceDefaults/XY.ServiceDefaults.csproj" />
+  <Project Path="XY.Web/XY.Web.csproj" />
 </Solution>
