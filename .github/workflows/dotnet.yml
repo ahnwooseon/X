@@ -1,75 +1,61 @@
-name: CI/CD - Build, Push & Deploy Blazor App
+name: CI/CD - Build & Deploy Blazor App (Local only with Compose)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build-app:
-    name: 🛠 Build & Test Blazor App
+    name: 🛠 Build, Test & Publish Blazor App
     runs-on: self-hosted
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Setup .NET
+      - name: Setup .NET 9
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
 
-      - name: Restore, Build, Test, Publish
+      - name: Restore, Build, Test and Publish
         run: |
           dotnet restore
           dotnet build --no-restore
           dotnet test --no-build --verbosity normal
-          dotnet publish -c Release -o app
+          dotnet publish XY/XY.csproj Release -o publish
 
-      - name: Upload Published App
+      - name: Upload published app
         uses: actions/upload-artifact@v4
         with:
           name: xy
-          path: app/
+          path: publish/
 
   build-image:
-    name: 🐳 Build & Push Docker Image
+    name: 🐳 Build Docker Image Locally
     needs: build-app
     runs-on: self-hosted
 
     steps:
-      - name: Download Published App
+      - name: Download published app
         uses: actions/download-artifact@v4
         with:
           name: xy
           path: app/
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build & Push Image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ahnwooseon/xy:latest
+      - name: Build Docker Image
+        run: |
+          docker build -t xy:latest ./app
 
   deploy:
-    name: 🚚 Deploy to Local Docker Server
+    name: 🚚 Deploy Container via Docker Compose
     needs: build-image
     runs-on: self-hosted
 
     steps:
-      - name: Pull & Run Container
+      - name: Deploy with docker-compose
         run: |
-          docker pull ahnwooseon/xy:latest
-          docker stop xy || true
-          docker rm xy || true
-          docker run -d --name xy -p 6789:80 ahnwooseon/xy:latest
+          docker compose down
+          docker compose up -d
