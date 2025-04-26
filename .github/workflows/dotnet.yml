@@ -35,6 +35,7 @@ jobs:
     name: 🐳 Build & Push Docker Image
     needs: build-app
     runs-on: self-hosted
+    
     steps:
       - name: Download Published App
         uses: actions/download-artifact@v4
@@ -63,9 +64,7 @@ jobs:
     name: 🚚 Deploy to Synology
     needs: build-image
     runs-on: self-hosted
-    environment:
-      name: production
-      url: http://${{ secrets.SSH_HOST }}:8080
+
     steps:
       - name: Add SSH Key
         uses: webfactory/ssh-agent@v0.9.0
