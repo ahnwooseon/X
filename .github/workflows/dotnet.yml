@@ -10,6 +10,7 @@ jobs:
   build-app:
     name: 🛠 Build & Test Blazor App
     runs-on: self-hosted
+
     steps:
       - uses: actions/checkout@v4
 
@@ -28,19 +29,19 @@ jobs:
       - name: Upload Published App
         uses: actions/upload-artifact@v4
         with:
-          name: blazor-app
+          name: xy
           path: app/
 
   build-image:
     name: 🐳 Build & Push Docker Image
     needs: build-app
     runs-on: self-hosted
-    
+
     steps:
       - name: Download Published App
         uses: actions/download-artifact@v4
         with:
-          name: blazor-app
+          name: xy
           path: app/
 
       - name: Set up Docker Buildx
@@ -61,21 +62,14 @@ jobs:
           tags: ahnwooseon/xy:latest
 
   deploy:
-    name: 🚚 Deploy to Synology
+    name: 🚚 Deploy to Local Docker Server
     needs: build-image
     runs-on: self-hosted
 
     steps:
-      - name: Add SSH Key
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
       - name: Pull & Run Container
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            docker pull ahnwooseon/xy:latest
-            docker stop blazor-app || true
-            docker rm blazor-app || true
-            docker run -d --name blazor-app -p 8080:80 ahnwooseon/xy:latest
-          EOF
+          docker pull ahnwooseon/xy:latest
+          docker stop xy || true
+          docker rm xy || true
+          docker run -d --name xy -p 6789:80 ahnwooseon/xy:latest
