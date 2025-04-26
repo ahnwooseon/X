@@ -2,6 +2,9 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
+# Installer le workload aspire
+RUN dotnet workload install aspire
+
 # Copie du projet Aspire (.csproj)
 COPY ["XY.AppHost/XY.AppHost.csproj", "XY.AppHost/"]
 RUN dotnet restore "XY.AppHost/XY.AppHost.csproj"
