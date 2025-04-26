@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  xy:
+    image: xy:latest
+    container_name: xy
+    ports:
+      - "6789:80"
+    restart: always
