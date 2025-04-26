@@ -18,6 +18,7 @@ RUN dotnet build -c Release -o /app/build
 
 # Étape 2 : Publication de l'application
 FROM build AS publish
+WORKDIR /src/XY.AppHost
 RUN dotnet publish -c Release -o /app/publish
 
 # Étape 3 : Image finale pour exécuter l'application
