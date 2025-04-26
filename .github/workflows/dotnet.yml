@@ -45,7 +45,7 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ahnwooseon/x:latest
+        tags: ahnwooseon/xy:latest
 
     - name: Add SSH key
       uses: webfactory/ssh-agent@v0.9.0
@@ -58,5 +58,5 @@ jobs:
           docker pull myuser/blazor-app:latest
           docker stop blazor-app || true
           docker rm blazor-app || true
-          docker run -d --name blazor-app -p 8080:80 myuser/blazor-app:latest
+          docker run -d --name blazor-app -p 8080:80 ahnwooseon/xy:latest
         EOF
