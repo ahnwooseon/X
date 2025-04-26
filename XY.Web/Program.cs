@@ -12,12 +12,14 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddOutputCache();
 
+var apiServiceUrl = builder.Configuration["ApiService:Url"] ?? "http://api";
+var apiServicePort = builder.Configuration["ApiService:Port"] ?? "8080";
+
 builder.Services.AddHttpClient<WeatherApiClient>(client =>
-    {
-        // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
-        // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
-        client.BaseAddress = new("https+http://apiservice");
-    });
+{
+    // Utilisation des valeurs configurées pour l'URL de base du service API
+    client.BaseAddress = new Uri($"{apiServiceUrl}:{apiServicePort}");
+});
 
 var app = builder.Build();
 
