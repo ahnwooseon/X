@@ -2,13 +2,13 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # Copier les projets nécessaires et restaurer les dépendances
-COPY ["XY.ApiService.csproj", "XY.ApiService/"]
-COPY ["../XY.ServiceDefaults.csproj", "XY.ServiceDefaults/"]
+COPY ["XY.ApiService/XY.ApiService.csproj", "XY.ApiService/"]
+COPY ["XY.ServiceDefaults/XY.ServiceDefaults.csproj", "XY.ServiceDefaults/"]
 RUN dotnet restore "XY.ApiService/XY.ApiService.csproj"
 
 # Copier tout le code source et construire
-COPY ["./*", "XY.ApiService/"]
-COPY ["../XY.ServiceDefaults/", "XY.ServiceDefaults/"]
+COPY ["XY.ApiService", "XY.ApiService/"]
+COPY ["XY.ServiceDefaults/", "XY.ServiceDefaults/"]
 
 # Construire l’application
 WORKDIR /src

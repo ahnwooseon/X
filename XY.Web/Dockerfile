@@ -2,13 +2,13 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # Copier les projets nécessaires et restaurer les dépendances
-COPY ["XY.Web.csproj", "XY.Web/"]
-COPY ["../XY.ServiceDefaults.csproj", "XY.ServiceDefaults/"]
+COPY ["XY.Web/XY.Web.csproj", "XY.Web/"]
+COPY ["XY.ServiceDefaults/XY.ServiceDefaults.csproj", "XY.ServiceDefaults/"]
 RUN dotnet restore "XY.Web/XY.Web.csproj"
 
 # Copier tout le code source et construire
-COPY ["XY.Web/", "XY.Web/"]
-COPY ["../XY.ServiceDefaults/", "XY.ServiceDefaults/"]
+COPY ["XY.Web/XY.Web/", "XY.Web/"]
+COPY ["XY.ServiceDefaults/XY.ServiceDefaults/", "XY.ServiceDefaults/"]
 
 # Construire l’application
 WORKDIR /src
