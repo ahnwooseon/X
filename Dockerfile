@@ -5,7 +5,7 @@ EXPOSE 80
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 COPY . .
-RUN dotnet publish -c Release -o /app
+RUN dotnet publish XY/XY.csproj -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
